@@ -8,7 +8,6 @@ ENV TZ=UTC \
   LANGUAGE=en_US:en \
   LC_ALL=en_US.UTF-8 \
   # composer environment
-  COMPOSER_ALLOW_SUPERUSER=1 \
   COMPOSER_HOME=/composer \
   # Laravel environment
   DB_CONNECTION=mysql \
@@ -25,13 +24,16 @@ RUN apt-get update && \
   rm -rf /var/lib/apt/lists/* && \
   locale-gen en_US.UTF-8 && \
   localedef -f UTF-8 -i en_US en_US.UTF-8 && \
-  mkdir /var/run/php-fpm && \
   docker-php-ext-install intl pdo_mysql mbstring zip bcmath && \
   composer config -g process-timeout 3600 && \
   composer config -g repos.packagist composer https://packagist.org && \
-  composer global require hirak/prestissimo
+  composer global require hirak/prestissimo && \
+  mkdir -p /work/backend /var/run/php-fpm && \
+  chown -R www-data:www-data /var/run/php-fpm /composer /work && \
+  chmod -R 777 /var/run/php-fpm
 
 COPY ./php-fpm.d/zzz-www.conf /usr/local/etc/php-fpm.d/zzz-www.conf
 COPY ./php.ini /usr/local/etc/php/php.ini
 
+USER www-data
 WORKDIR /work/backend
